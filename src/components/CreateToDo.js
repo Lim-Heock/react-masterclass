@@ -1,10 +1,3 @@
-//react-hook-form 과 Recoil atom 변경이 동시에 일어나는 핵심 파일입니다.
-/* 이 컴포넌트는 toDoAtom의 값을 *변경(write)하기만 합니다.
-  useForm으로 폼을 만들고, 유효성 검사(register)를 통과하면(handleSubmit), 
-  onValid 함수가 실행됩니다.
-  onValid 안에서 setToDos를 호출해 Recoil atom에 새로운 할 일을 추가합니다. 
-
-*/
 import { useForm } from "react-hook-form";
 import { useSetRecoilState } from "recoil";
 import { toDoAtom } from "../atom";
@@ -24,15 +17,16 @@ function CreateToDo() {
 
   //3.폼 제출 시 실행될 함수
   const onValid = (data) => {
-    //data 에는 { toDo: "입력값" }이 들어있음
-    console.log("Add to do:", data.toDo);
-
-    //4.Recoil atom 상태 업데이트
-    setToDos((oldTodos) => [
-      { text: data.toDo, id: Date.now() }, // 새 할 일 객체
-      ...oldTodos, // 기존 할 일 목록록
-    ]);
-    //5.폼 입력창 비우기
+    // 핵심 변경사항
+    // 기존 : setToDos((oldToDos) => [data.toDo, ...oldToDos])
+    // 변경 : 객체 형태로 저장합니다.
+    const newToDo = {
+      text: data.toDo, // 사용자가 입력한 할일
+      id: Date.now(), // 고유한 ID
+      category: "TO_DO", //기본 카테고리
+    }; // 새 할 일 객체
+    console.log("새로 추가된 할 일: ", newToDo);
+    setToDos((oldToDos) => [newToDo, ...oldToDos]);
     setValue("toDo", "");
   };
   return (

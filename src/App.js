@@ -7,7 +7,7 @@ import { darkTheme, lightTheme } from "./theme";
 import { GlobalStyle } from "./GlobalStyle";
 //컴포넌트 불러오기
 import CreateToDo from "./components/CreateToDo";
-import ToDoList from "./ToDoList";
+import ToDoList from "./components/ToDoList";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -56,7 +56,6 @@ function App() {
         <ThemeToggleButton onClick={toggleDarkAtom}>
           {isDark ? "☀️" : "🌙"}
         </ThemeToggleButton>
-        <CreateToDo />
         <ToDoList />
       </Container>
     </ThemeProvider>
