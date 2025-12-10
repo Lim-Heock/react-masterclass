@@ -38,11 +38,35 @@
 //   );
 // }
 
-// export default App;
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+//이 강의의 핵심은 **"드래그를 끝냈을 때(onDragEnd), 아이템이 원래 자리로 돌아가는 것이 아니라 변경된 위치에 고정되도록 배열 순서를 바꾸는 것"**입니다.
 
+// export default App;
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "react-beautiful-dnd";
 function App() {
-  const onDragEnd = () => {};
+  // 1. 드래그할 아이템들을 배열 State로 관리
+  const [toDos, setToDos] = useState(["a", "b", "c", "d", "e"]);
+  // 2. 드래그가 끝낫을 때 실행되는 함수
+  const onDragEnd = ({ destination, source }: DropResult) => {
+    //2-1. 지정된 영역이 아닌 곳에 드랍했을 경우 아무것도 하지 않음
+    if (!destination) return;
+    //2-2. 배열 복사 및 재배치 로직
+    setToDos((oldToDos) => {
+      const toDosCopy = [...oldToDos];
+      // 1) 움직인 아이템을 자리에서 삭제
+      const itemToMove = toDosCopy.splice(source.index, 1)[0];
+      // splice는 여러 개를 지울 수도 있기 때문에, 무조건 결과물을 배열(박스)에 담아서 주는 규칙이 있기 때문입니다.
+      // 박스 안에 아이템이 딱 하나(0번) 들어있으니, 그걸 꺼내는 것입니다.
+      // 2) 아이템을 도착한 자리에서( destination)에 삽입
+      toDosCopy.splice(destination.index, 0, itemToMove); // (start, deleteCount, item)
+      // 0은 삭제하지 않고 추가만 한다는 뜻
+      return toDosCopy; // 변경된 배열 반환
+    });
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
