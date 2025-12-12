@@ -41,49 +41,69 @@
 //이 강의의 핵심은 **"드래그를 끝냈을 때(onDragEnd), 아이템이 원래 자리로 돌아가는 것이 아니라 변경된 위치에 고정되도록 배열 순서를 바꾸는 것"**입니다.
 
 // export default App;
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "react-beautiful-dnd";
-function App() {
-  // 1. 드래그할 아이템들을 배열 State로 관리
-  const [toDos, setToDos] = useState(["a", "b", "c", "d", "e"]);
-  // 2. 드래그가 끝낫을 때 실행되는 함수
-  const onDragEnd = ({ destination, source }: DropResult) => {
-    //2-1. 지정된 영역이 아닌 곳에 드랍했을 경우 아무것도 하지 않음
-    if (!destination) return;
-    //2-2. 배열 복사 및 재배치 로직
-    setToDos((oldToDos) => {
-      const toDosCopy = [...oldToDos];
-      // 1) 움직인 아이템을 자리에서 삭제
-      const itemToMove = toDosCopy.splice(source.index, 1)[0];
-      // splice는 여러 개를 지울 수도 있기 때문에, 무조건 결과물을 배열(박스)에 담아서 주는 규칙이 있기 때문입니다.
-      // 박스 안에 아이템이 딱 하나(0번) 들어있으니, 그걸 꺼내는 것입니다.
-      // 2) 아이템을 도착한 자리에서( destination)에 삽입
-      toDosCopy.splice(destination.index, 0, itemToMove); // (start, deleteCount, item)
-      // 0은 삭제하지 않고 추가만 한다는 뜻
-      return toDosCopy; // 변경된 배열 반환
-    });
-  };
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
+import styled from "styled-components";
+
+const Wrapper = styled.div`
+  display: flex;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+`;
+const Boards = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(1, 1fr);
+`;
+
+const Board = styled.div`
+  padding: 20px 10px;
+  padding-top: 30px;
+  background-color: ${(props) => props.theme.boardColor};
+  border-radius: 5px;
+  min-height: 200px;
+`;
+const Card = styled.div`
+  border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 10px 10px;
+  background-color: ${(props) => props.theme.cardColor};
+`;
+
+const toDos = ["a", "b", "c", "d", "e", "f"];
+
+function App() {
+  const onDragEnd = () => {};
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div>
-        <Droppable droppableId="one">
-          {() => (
-            <ul>
-              <Draggable draggableId="first" index={0}>
-                {() => <li>one</li>}
-              </Draggable>
-              <Draggable draggableId="second" index={1}>
-                {() => <li>two</li>}
-              </Draggable>
-            </ul>
-          )}
-        </Droppable>
-      </div>
+      <Wrapper>
+        <Boards>
+          <Droppable droppableId="one">
+            {(magic) => (
+              <Board ref={magic.innerRef} {...magic.droppableProps}>
+                {toDos.map((toDo, index) => (
+                  <Draggable draggableId={toDo} index={index}>
+                    {(magic) => (
+                      <Card
+                        ref={magic.innerRef}
+                        {...magic.dragHandleProps}
+                        {...magic.draggableProps}
+                      >
+                        {toDo}
+                      </Card>
+                    )}
+                  </Draggable>
+                ))}
+                {magic.placeholder}
+              </Board>
+            )}
+          </Droppable>
+        </Boards>
+      </Wrapper>
     </DragDropContext>
   );
 }
