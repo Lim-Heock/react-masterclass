@@ -5,23 +5,31 @@
 // 1. atoms.tsx 수정 (핵심!)
 // selector 안에 get만 있었는데, 이제 **set**이라는 함수를 추가합니다. "시간(hours)" 값이 들어오면 그걸 다시 "분(minutes)"으로 바꿔서 원래 state(minuteState)를 업데이트해주는 로직입니다.
 
-import { atom, selector } from "recoil";
+import { atom } from "recoil";
 
-export const minuteState = atom<number>({
-  key: "minutes",
-  default: 0,
-});
+interface IToDoState {
+  [key: string]: string[];
+}
+// export const minuteState = atom<number>({
+//   key: "minutes",
+//   default: 0,
+// });
 
-export const hourSelector = selector<number>({
-  key: "hours",
-  get: ({ get }) => {
-    const minutes = get(minuteState);
-    return minutes / 60;
-  },
-  set: ({ set }, newValue) => {
-    //들어온 값(시간)을 숫자로 바꾸고 60을 곱하기
-    const minutes = Number(newValue) * 60;
-    //그 값을 minuteState에 설정(set)함
-    set(minuteState, minutes);
-  },
+// export const hourSelector = selector<number>({
+//   key: "hours",
+//   get: ({ get }) => {
+//     const minutes = get(minuteState);
+//     return minutes / 60;
+//   },
+//   set: ({ set }, newValue) => {
+//     //들어온 값(시간)을 숫자로 바꾸고 60을 곱하기
+//     const minutes = Number(newValue) * 60;
+//     //그 값을 minuteState에 설정(set)함
+//     set(minuteState, minutes);
+//   },
+// });
+
+export const toDoState = atom<IToDoState>({
+  key: "toDo",
+  default: { to_do: ["a", "b", "c", "d", "e", "f"], doing: [], done: [] },
 });
