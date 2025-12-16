@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { useRecoilState } from "recoil";
 import { toDoState } from "./atoms";
 import Board from "./components/Board";
+import { info } from "console";
 
 const Wrapper = styled.div`
   display: flex;
@@ -25,29 +26,44 @@ const Boards = styled.div`
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
-  const onDragEnd = (info: DropResult) => { 
-    console.log(info);
-    const {destination, source, draggableId} = info;
+  const onDragEnd = (info: DropResult) => {
+    const { destination, source, draggableId } = info;
+    if (!destination) return;
+
     if (destination?.droppableId === source.droppableId) {
       setToDos((allBoards) => {
-      const boardCopy = [ ...allBoards[source.droppableId]];
-      boardCopy.splice(source.index, 1);
-      boardCopy.splice(destination.index, 0, draggableId);
-      return {
-        ...allBoards, // 변화없는 부분
-        [source.droppableId] : boardCopy, // 변화된 부분 
-        /*key 자리에 대괄호 [ ]를 쓴 것은 **"변수 안에 담긴 값을 키(Key) 이름으로 쓰겠다"**는 뜻입니다. (Computed Property Name)
-      source.droppableId: 그냥 쓰면 문법 에러가 나거나 문자 그대로 인식될 수 있음.
-      [source.droppableId]: 변수를 해석해서 그 안에 들어있는 값(예: "To Do", "Doing" 등)을 키 이름으로 동적으로 사용함.*/
-
-        //자바스크립트 객체(Object)에서는 "키(Key)가 중복되면, 뒤에 오는 것이 덮어쓴다(Overwrite)"는 절대 규칙이 있습니다. 이 규칙 때문에 대체(수정)가 가능한 것입니다.
-      };
+        const boardCopy = [...allBoards[source.droppableId]];
+        boardCopy.splice(source.index, 1);
+        boardCopy.splice(destination.index, 0, draggableId);
+        return {
+          ...allBoards, // 변화없는 부분
+          [source.droppableId]: boardCopy, // 변화된 부분
+        };
       });
     }
-  }
+    // 다른 보드로 이동(새로 추가된 핵심)
+    if (destination?.droppableId !== source.droppableId) {
+      setToDos((allBoards) => {
+        //출발지 보드와 목적지 보드를 각각 복사
+        const sourceBoard = [...allBoards[source.droppableId]];
+        const destinationBoard = [...allBoards[destination.droppableId]];
+
+        //출발지에서 아이템지우기
+        sourceBoard.splice(source.index, 1);
+        // 목적지에 정해진 위치에 넣기
+        destinationBoard.splice(destination.index, 0, draggableId);
+
+        // 변경된 두 보드를 state에 동시에 업데이트 합니다
+        return {
+          ...allBoards,
+          [source.droppableId]: sourceBoard,
+          [destination.droppableId]: destinationBoard,
+        };
+      });
+    }
+  };
 
   // 모든 card들을 reRenderting 하기 때문에 옮기고 있을때 잠깐씩 오류가 발생함
-    
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
