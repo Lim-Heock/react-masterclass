@@ -5,7 +5,6 @@ import styled from "styled-components";
 import { useRecoilState } from "recoil";
 import { toDoState } from "./atoms";
 import Board from "./components/Board";
-import { info } from "console";
 
 const Wrapper = styled.div`
   display: flex;
