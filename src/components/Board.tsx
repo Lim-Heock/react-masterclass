@@ -1,7 +1,9 @@
 import { Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
 import DraggableCard from "./DraggableCard";
-import { useRef } from "react";
+import { useForm } from "react-hook-form";
+import { ITodo, toDoState } from "../atoms";
+import { useSetRecoilState } from "recoil";
 
 const Wrapper = styled.div`
   padding-top: 5px;
@@ -36,29 +38,49 @@ const Area = styled.div<IAreaProps>`
   padding: 20px 20px;
 `;
 
+const Form = styled.form`
+  width: 100%;
+  input {
+    width: 100%;
+  }
+`;
+
+interface IForm {
+  toDo: string;
+}
+
 interface IBoardProps {
-  toDos: string[];
+  toDos: ITodo[];
   boardId: string;
 }
 
 function Board({ toDos, boardId }: IBoardProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const onClick = () => {
-    inputRef.current?.focus(); // input 에서 강제로 포커스를 둔다 (커서 깜빡임
-    //5초뒤에 포커스를 없애는 (blur)테스트 코드
-    setTimeout(() => {
-      inputRef.current?.blur();
-    }, 5000);
+  const setToDos = useSetRecoilState(toDoState);
+  const { register, setValue, handleSubmit } = useForm();
+  const onValid = ({ toDo }: IForm) => {
+    const newToDo = {
+      id: Date.now(),
+      text: toDo,
+    };
+    setToDos((allBoards) => {
+      return {
+        ...allBoards,
+        [boardId]: [...allBoards[boardId], newToDo],
+      };
+    });
+    setValue("toDo", "");
   };
 
   return (
     <Wrapper>
       <Title>{boardId}</Title>
-      {/*Ref 연결 및 테스트 버튼 추가*/}
-      <input ref={inputRef} placeholder="input me" />
-      <button onClick={onClick}>click me</button>
-
+      <Form onSubmit={handleSubmit(onValid)}>
+        <input
+          {...register("toDo", { required: true })}
+          type="text"
+          placeholder={` Add task on ${boardId}`}
+        />
+      </Form>
       <Droppable droppableId={boardId}>
         {(magic, info) => (
           <Area
@@ -68,7 +90,12 @@ function Board({ toDos, boardId }: IBoardProps) {
             {...magic.droppableProps}
           >
             {toDos.map((toDo, index) => (
-              <DraggableCard key={toDo} index={index} toDo={toDo} />
+              <DraggableCard
+                key={toDo.id}
+                index={index}
+                toDoId={toDo.id}
+                toDoText={toDo.text}
+              />
             ))}
             {magic.placeholder}
           </Area>

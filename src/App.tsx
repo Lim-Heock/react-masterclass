@@ -32,8 +32,9 @@ function App() {
     if (destination?.droppableId === source.droppableId) {
       setToDos((allBoards) => {
         const boardCopy = [...allBoards[source.droppableId]];
+        const taskObj = boardCopy[source.index];
         boardCopy.splice(source.index, 1);
-        boardCopy.splice(destination.index, 0, draggableId);
+        boardCopy.splice(destination.index, 0, taskObj);
         return {
           ...allBoards, // 변화없는 부분
           [source.droppableId]: boardCopy, // 변화된 부분
@@ -46,11 +47,11 @@ function App() {
         //출발지 보드와 목적지 보드를 각각 복사
         const sourceBoard = [...allBoards[source.droppableId]];
         const destinationBoard = [...allBoards[destination.droppableId]];
-
+        const taskObj = sourceBoard[source.index];
         //출발지에서 아이템지우기
         sourceBoard.splice(source.index, 1);
         // 목적지에 정해진 위치에 넣기
-        destinationBoard.splice(destination.index, 0, draggableId);
+        destinationBoard.splice(destination.index, 0, taskObj);
 
         // 변경된 두 보드를 state에 동시에 업데이트 합니다
         return {
