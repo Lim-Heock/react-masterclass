@@ -1,7 +1,9 @@
 import { Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
 import DraggableCard from "./DraggableCard";
-import { useRef } from "react";
+import { useForm } from "react-hook-form";
+import { ITodo, toDoState } from "../atoms";
+import { useSetRecoilState } from "recoil";
 
 const Wrapper = styled.div`
   padding-top: 5px;
@@ -36,29 +38,63 @@ const Area = styled.div<IAreaProps>`
   padding: 20px 20px;
 `;
 
+const Form = styled.form`
+  width: 100%;
+  input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+`;
+
 interface IBoardProps {
-  toDos: string[];
+  toDos: ITodo[];
   boardId: string;
+  //innerRef: 라이브러리가 HTML 요소를 조작하기 위한 참조값
+  innerRef: React.Ref<HTMLDivElement>;
+  //draggableProps: 이 컴포넌트가 '드래그 가능한 객체' 임을 등록하는 모든 정보
+  draggableProps: any;
+  //dragHandleProps: 이 컴포넌트의 '어느부위를 잡아야" 드래그가 시작될지 결정하는 정보
+  dragHandleProps: any;
 }
 
-function Board({ toDos, boardId }: IBoardProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+interface IForm {
+  toDo: string;
+}
 
-  const onClick = () => {
-    inputRef.current?.focus(); // input 에서 강제로 포커스를 둔다 (커서 깜빡임
-    //5초뒤에 포커스를 없애는 (blur)테스트 코드
-    setTimeout(() => {
-      inputRef.current?.blur();
-    }, 5000);
+function Board({
+  toDos,
+  boardId,
+  innerRef,
+  draggableProps,
+  dragHandleProps,
+}: IBoardProps) {
+  const setToDos = useSetRecoilState(toDoState);
+  const { register, setValue, handleSubmit } = useForm<IForm>();
+
+  const onValid = ({ toDo }: IForm) => {
+    const newToDo = {
+      id: Date.now(),
+      text: toDo,
+    };
+    setToDos((allBoards) => {
+      return {
+        ...allBoards,
+        [boardId]: [...allBoards[boardId], newToDo],
+      };
+    });
+    setValue("toDo", ""); // toDo라는 이름의 input을 초기화
   };
-
   return (
-    <Wrapper>
-      <Title>{boardId}</Title>
-      {/*Ref 연결 및 테스트 버튼 추가*/}
-      <input ref={inputRef} placeholder="input me" />
-      <button onClick={onClick}>click me</button>
+    <Wrapper ref={innerRef} {...draggableProps}>
+      <Title {...dragHandleProps}>{boardId}</Title>
 
+      <Form onSubmit={handleSubmit(onValid)}>
+        <input
+          {...register("toDo", { required: true })}
+          type="text"
+          placeholder="To Do"
+        />
+      </Form>
       <Droppable droppableId={boardId}>
         {(magic, info) => (
           <Area
@@ -68,7 +104,12 @@ function Board({ toDos, boardId }: IBoardProps) {
             {...magic.droppableProps}
           >
             {toDos.map((toDo, index) => (
-              <DraggableCard key={toDo} index={index} toDo={toDo} />
+              <DraggableCard
+                key={toDo.id}
+                index={index}
+                toDoText={toDo.text}
+                toDoId={toDo.id}
+              />
             ))}
             {magic.placeholder}
           </Area>
