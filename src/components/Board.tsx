@@ -95,6 +95,7 @@ function Board({
           placeholder="To Do"
         />
       </Form>
+
       <Droppable droppableId={boardId}>
         {(magic, info) => (
           <Area
@@ -109,6 +110,8 @@ function Board({
                 index={index}
                 toDoText={toDo.text}
                 toDoId={toDo.id}
+                // 너네 집 주소는 boardId야
+                boardId={boardId}
               />
             ))}
             {magic.placeholder}
