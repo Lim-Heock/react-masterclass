@@ -15,26 +15,23 @@ export interface ITodo {
 interface IToDoState {
   [key: string]: ITodo[];
 }
-// export const minuteState = atom<number>({
-//   key: "minutes",
-//   default: 0,
-// });
-
-// export const hourSelector = selector<number>({
-//   key: "hours",
-//   get: ({ get }) => {
-//     const minutes = get(minuteState);
-//     return minutes / 60;
-//   },
-//   set: ({ set }, newValue) => {
-//     //들어온 값(시간)을 숫자로 바꾸고 60을 곱하기
-//     const minutes = Number(newValue) * 60;
-//     //그 값을 minuteState에 설정(set)함
-//     set(minuteState, minutes);
-//   },
-// });
+// 로컬 스토리지 확인 함수
+// 1.저장된 게 있는지 확인하고
+// 2.있으면 JSON.parse로 다시 객체로 변환해서 리턴
+// 3.없으면 null 리턴
+const getSavedToDos = () => {
+  const localData = localStorage.getItem("toDos");
+  if (localData) {
+    return JSON.parse(localData); // JSON 파일(텍스트 문자열로 되어 있는 녀석을)
+    // 다시 자바스크립트가 쓸 수 있는 객체 형태(Object)로 되살려낸다 .App 35 Line
+  }
+  return null;
+};
 
 export const toDoState = atom<IToDoState>({
   key: "toDo",
-  default: { to_do: [], doing: [], done: [] },
+  // [변경점] default 값 설정
+  // 저장된 게 있으면(getSavedToDos) 가 값을 주면, 그것을 쓰고
+  // 없으면 (null이면) 우리가 쓰던 초기값을 씁니다
+  default: getSavedToDos() || { to_do: [], doing: [], done: [] },
 });

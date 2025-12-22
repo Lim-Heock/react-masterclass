@@ -1,5 +1,6 @@
 // 구제적인 드래그 UI 구현은 DraggableCard에 위임, 데이터를 관리하고 리스트를
 // 리스트를 나열하는 역할만 한다
+import { useEffect } from "react";
 import {
   DragDropContext,
   Draggable,
@@ -30,6 +31,13 @@ const Boards = styled.div`
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
+  // [변경점] toDos가 변할 때마다 로컬 스토리지에 저장하는 코드 추가
+  useEffect(() => {
+    //localStorage는 문자열만 저장할 수 있어서 JSON.stringify로 객체를 문자열로 반환합니다
+    localStorage.setItem("toDos", JSON.stringify(toDos)); // "toDos"라는 이름표를 붙여서 넣어라!
+  }, [toDos]); // [todos] : toDos가 바뀔 때마다 이 코드를 실행하라
+
+  // 기존 드래그 앤 드롭 로직 그대로 유지
   const onDragEnd = (info: DropResult) => {
     const { destination, source } = info;
     if (!destination) return;
