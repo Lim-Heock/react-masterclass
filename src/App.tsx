@@ -1,52 +1,73 @@
 import styled from "styled-components";
-import { motion, useMotionValue, useTransform, useScroll } from "framer-motion";
-
-const Wrapper = styled(motion.div)`
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+const Wrapper = styled.div`
   height: 100vh;
   width: 100vw;
-  background-color: #111;
+  background-color: #fa5c5c;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
-const Svg = styled.svg`
-  width: 300px;
-  height: 300px;
-  path {
-    stroke: white;
-    stroke-width: 2;
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 50vw;
+  div:first-child,
+  div:last-child {
+    grid-column: span 2;
   }
 `;
 
-const svg = {
-  start: { pathLength: 0, fill: "rgba(255,255,255,0)" },
-  end: { pathLength: 1, fill: "rgba(255, 255, 255, 1)" },
-};
+const Box = styled(motion.div)`
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
 
+const Overlay = styled(motion.div)`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const overlay = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 function App() {
-  const x = useMotionValue(0);
+  const [id, setId] = useState<string | null>(null);
 
   return (
     <Wrapper>
-      <Svg
-        focusable="false"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-      >
-        <motion.path
-          variants={svg}
-          initial={"start"}
-          animate={"end"}
-          transition={{
-            default: {
-              duration: 5,
-            },
-            fill: { duration: 1, delay: 2 },
-          }}
-          d="M80 160c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-48 0c-17.7 0-32-14.3-32-32L0 192c0-17.7 14.3-32 32-32l48 0zM270.6 16C297.9 16 320 38.1 320 65.4l0 4.2c0 6.8-1.3 13.6-3.8 19.9L288 160 448 160c26.5 0 48 21.5 48 48 0 19.7-11.9 36.6-28.9 44 17 7.4 28.9 24.3 28.9 44 0 23.4-16.8 42.9-39 47.1 4.4 7.3 7 15.8 7 24.9 0 22.2-15 40.8-35.4 46.3 2.2 5.5 3.4 11.5 3.4 17.7 0 26.5-21.5 48-48 48l-87.9 0c-36.3 0-71.6-12.4-99.9-35.1L184 435.2c-15.2-12.1-24-30.5-24-50l0-186.6c0-14.9 3.5-29.6 10.1-42.9L226.3 43.3C234.7 26.6 251.8 16 270.6 16z"
-        />
-      </Svg>
+      <Grid>
+        {["1", "2", "3", "4"].map((item) => (
+          <Box key={item} onClick={() => setId(item)} layoutId={item} />
+        ))}
+      </Grid>
+      <AnimatePresence>
+        {id ? (
+          <Overlay
+            variants={overlay}
+            onClick={() => setId(null)}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <Box layoutId={id} style={{ width: 400, height: 200 }} />
+          </Overlay>
+        ) : null}
+      </AnimatePresence>
     </Wrapper>
   );
 }
